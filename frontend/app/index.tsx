@@ -1,8 +1,10 @@
-import { Text, View, StyleSheet, Button } from 'react-native';
+import { Text, View, StyleSheet, Pressable, Button } from 'react-native';
 import { useState } from 'react';
+import { useRouter } from 'expo-router';
 
 export default function Index() {
   const [ingredients, setIngredients] = useState<string[]>([]);
+  const router = useRouter();
 
   async function handlePress() {
     const data = await getIngredients('894700010021');
@@ -14,6 +16,15 @@ export default function Index() {
     <View style={styles.container}>
       <Text style={styles.text}>Home screen</Text>
 
+      {/* Scan Barcode navigation */}
+      <Pressable
+        style={styles.button}
+        onPress={() => router.push('/camera')}
+      >
+        <Text style={styles.buttonText}>Scan Barcode</Text>
+      </Pressable>
+
+      {/* Test UPC fetch */}
       <Button title="Test UPC" onPress={handlePress} />
 
       {ingredients.map((item, index) => (
@@ -33,6 +44,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   text: {
+    color: '#fff',
+    marginBottom: 20,
+  },
+  button: {
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#fff',
+    borderRadius: 8,
+  },
+  buttonText: {
     color: '#fff',
   },
 });
