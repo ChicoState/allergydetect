@@ -1,9 +1,19 @@
-import { Text, View,  StyleSheet } from 'react-native';
+import { Text, View, StyleSheet, Pressable } from 'react-native';
+import { useRouter } from 'expo-router';
 
 export default function Index() {
+  const router = useRouter();
+
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Home screen</Text>
+
+      <Pressable
+        style={styles.button}
+        onPress={() => router.push('/camera')}
+      >
+        <Text style={styles.buttonText}>Scan Barcode</Text>
+      </Pressable>
     </View>
   );
 }
@@ -16,6 +26,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   text: {
+    color: '#fff',
+    marginBottom: 20,
+  },
+  button: {
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#fff',
+    borderRadius: 8,
+  },
+  buttonText: {
     color: '#fff',
   },
 });
