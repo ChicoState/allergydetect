@@ -1,3 +1,12 @@
+const fs = require('fs');
+const path = require('path');
+
+const allergyFilePath = path.join(__dirname, '../allergies.json');
+
+if (!fs.existsSync(allergyFilePath)) {
+  fs.writeFileSync(allergyFilePath, JSON.stringify([]));
+}
+
 var express = require('express');
 const cors = require('cors');
 var router = express.Router();
@@ -50,14 +59,44 @@ return res.status(404).json({ error: 'No item found for this UPC' });
 }
 
 const ingredients = data.items[0].description
-.split(',')
-.map(i => i.trim());
+  .split(',')
+  .map(i => i.trim().toLowerCase());
 
-res.json({ ingredients });
+// Load saved allergies
+let savedAllergies = [];
+
+if (fs.existsSync(allergyFilePath)) {
+  savedAllergies = JSON.parse(fs.readFileSync(allergyFilePath));
+}
+
+// Compare
+const matches = ingredients.filter(ingredient =>
+  savedAllergies.some(allergy =>
+    ingredient.includes(allergy.toLowerCase())
+  )
+);
+
+res.json({
+  ingredients,
+  contains: matches
+});
+
 } catch (error) {
 console.error('Error fetching UPC data:', error);
 res.status(500).json({ error: 'Failed to fetch ingredients' });
 }
+});
+
+router.post('/allergies', (req, res) => {
+  const { allergies } = req.body;
+
+  if (!Array.isArray(allergies)) {
+    return res.status(400).json({ error: 'Allergies must be an array' });
+  }
+
+  fs.writeFileSync(allergyFilePath, JSON.stringify(allergies, null, 2));
+
+  res.json({ message: 'Allergies saved' });
 });
 
 
