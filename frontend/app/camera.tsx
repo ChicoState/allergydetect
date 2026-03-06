@@ -66,6 +66,10 @@ export default function CameraScreen() {
 
         <Text style={styles.text}>Type: {scannedType ?? "none"}</Text>
         <Text style={styles.text}>Value: {scannedValue ?? "none"}</Text>
+	
+	<Pressable style={styles.btn} onPress={() => { /* future func */ }}>
+  	  <Text>Add to Favorites</Text>
+	</Pressable>
 
         <Pressable
           style={styles.btn}
