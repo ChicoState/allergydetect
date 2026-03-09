@@ -1,12 +1,31 @@
 import { Text, View, StyleSheet, Pressable, Button, TextInput, ScrollView } from 'react-native';
-import { useState } from 'react';
-import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 
 export default function Index() {
   const [ingredients, setIngredients] = useState<string[]>([]);
   const [contains, setContains] = useState<string[]>([]);
   const [allergyInput, setAllergyInput] = useState('');
   const router = useRouter();
+
+  const params = useLocalSearchParams();
+  const scannedUpc = params.scannedUpc as string;
+
+  // Automatically fetch ingredients when a new scannedUpc arrives
+  useEffect(() => {
+    async function fetchScannedItem() {
+      if (scannedUpc) {
+        try {
+          const data = await getIngredients(scannedUpc);
+          setIngredients(data);
+        } catch (error) {
+          console.error("Failed to fetch ingredients:", error);
+        }
+      }
+    }
+
+    fetchScannedItem();
+  }, [scannedUpc]);
 
   async function handlePress() {
     const response = await fetch(
@@ -55,7 +74,10 @@ export default function Index() {
         <Text style={styles.buttonText}>Scan Barcode</Text>
       </Pressable>
 
-      {/* Test UPC fetch */}
+      {scannedUpc ? (
+        <Text style={styles.text}>Scanned UPC: {scannedUpc}</Text>
+      ) : null}
+
       <Button title="Test UPC" onPress={handlePress} />
 
       {contains.length > 0 && (
@@ -90,6 +112,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#fff',
     borderRadius: 8,
+    marginBottom: 20,
   },
   buttonText: {
     color: '#fff',
@@ -106,4 +129,24 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
+
+async function getIngredients(upc: string): Promise<string[]> {
+  try {
+    const response = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${upc}`);
+    const data = await response.json();
+
+    if (!data.items || data.items.length === 0) {
+      return [];
+    }
+
+    const ingredients = data.items[0].description
+      .split(',')
+      .map((i: string) => i.trim());
+
+    return ingredients;
+  } catch (error) {
+    console.error('Error fetching UPC data:', error);
+    return [];
+  }
+}
 

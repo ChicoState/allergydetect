@@ -7,9 +7,6 @@ import { useRouter } from "expo-router";
 export default function CameraScreen() {
   const router = useRouter();
   const [permission, requestPermission] = useCameraPermissions();
-
-  const [scannedValue, setScannedValue] = useState<string | null>(null);
-  const [scannedType, setScannedType] = useState<string | null>(null);
   const [scanningEnabled, setScanningEnabled] = useState(true);
 
   useEffect(() => {
@@ -18,14 +15,12 @@ export default function CameraScreen() {
   }, [permission, requestPermission]);
 
   const onBarcodeScanned = (result: BarcodeScanningResult) => {
-    if (!scanningEnabled) return; // prevents repeated scans firing
+    if (!scanningEnabled) return;
     setScanningEnabled(false);
 
-    setScannedValue(result.data); // <-- this is your UPC/barcode number (string)
-    setScannedType(result.type);
-
-    console.log("Scanned type:", result.type);
-    console.log("Scanned data:", result.data);
+    // Navigate back to the index page and pass the scanned data as a parameter
+    router.navigate({ pathname: '/', params: { scannedUpc: result.data } });
+    console.log("Scanned UPC:", result.data);
   };
 
   if (!permission) {
@@ -53,29 +48,13 @@ export default function CameraScreen() {
         style={styles.camera}
         facing="back"
         onBarcodeScanned={onBarcodeScanned}
-        // Optional: restrict to common barcode types (helps performance/accuracy)
         barcodeScannerSettings={{
           barcodeTypes: ["upc_a", "upc_e", "ean13", "ean8", "code128", "qr"],
         }}
       />
-
       <View style={styles.controls}>
         <Pressable style={styles.btn} onPress={() => router.back()}>
-         <Text>Back</Text>
-        </Pressable>
-
-        <Text style={styles.text}>Type: {scannedType ?? "none"}</Text>
-        <Text style={styles.text}>Value: {scannedValue ?? "none"}</Text>
-
-        <Pressable
-          style={styles.btn}
-          onPress={() => {
-            setScannedValue(null);
-            setScannedType(null);
-            setScanningEnabled(true);
-          }}
-        >
-          <Text>Scan Again</Text>
+          <Text>Back</Text>
         </Pressable>
       </View>
     </View>
@@ -84,12 +63,8 @@ export default function CameraScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  camera: { 
-    flex: 1//, 
-    //transform: [{ scaleX: -1 }],
-  },
+  camera: { flex: 1 },
   controls: { padding: 12, gap: 10, alignItems: "center" },
   btn: { paddingVertical: 10, paddingHorizontal: 16, borderWidth: 1, borderRadius: 8 },
-  text: { fontSize: 16 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
 });
