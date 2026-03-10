@@ -52,7 +52,11 @@ export default function Index() {
         style={styles.button}
         onPress={() => router.push('/camera')}
       >
-        <Text style={styles.buttonText}>Scan Barcode</Text>
+        <Text style={styles.buttonText}>Scan Barcode</Text> 
+      </Pressable>
+
+      <Pressable style={styles.button} onPress={() => router.push("/profiles")}>
+        <Text style={styles.buttonText}>Profiles / Settings</Text>
       </Pressable>
 
       {/* Test UPC fetch */}
