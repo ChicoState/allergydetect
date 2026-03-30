@@ -17,3 +17,12 @@ npx expo start
 ```
 * If you're using vim and MacOS you may need to add `set regexpengine=0` to your `.vimrc`. [Link to issue](https://github.com/vim/vim/issues/17247)
 * [More info](https://reactnative.dev/docs/environment-setup)
+
+## Firebase setup
+* Go to the firebase console
+* Create a `.env` file for credentials
+```bash
+cd frontend && cp .env.example .env
+```
+* Open the Firebase console and navigate to: Allergy Detect -> 1 app (top left) -> gear icon -> scroll down to bottom
+* populate `.env` with the values in `firebaseConfig`

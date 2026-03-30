@@ -1,12 +1,16 @@
 import { Text, View, StyleSheet, Pressable, Button, TextInput, ScrollView } from 'react-native';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
+import { doc, setDoc } from 'firebase/firestore';
+import { db } from '@/firebaseConfig';
+import { useAuthSession } from '@/providers/AuthProvider';
 
 export default function Index() {
   const [ingredients, setIngredients] = useState<string[]>([]);
   const [contains, setContains] = useState<string[]>([]);
   const [allergyInput, setAllergyInput] = useState('');
   const router = useRouter();
+  const { user } = useAuthSession();
 
   async function handlePress() {
     const response = await fetch(
@@ -20,15 +24,14 @@ export default function Index() {
   }
 
   async function saveAllergies() {
+    if (!user) return;
+
     const allergyArray = allergyInput
       .split(',')
-      .map(item => item.trim().toLowerCase());
+      .map(item => item.trim().toLowerCase())
+      .filter(item => item.length > 0);
 
-    await fetch('http://localhost:3000/allergies', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ allergies: allergyArray }),
-    });
+    await setDoc(doc(db, 'users', user.uid), { allergies: allergyArray }, { merge: true });
 
     console.log('Allergies saved');
   }
