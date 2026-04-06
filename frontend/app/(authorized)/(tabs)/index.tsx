@@ -31,9 +31,29 @@ export default function Index() {
       .map(item => item.trim().toLowerCase())
       .filter(item => item.length > 0);
 
-    await setDoc(doc(db, 'users', user.uid), { allergies: allergyArray }, { merge: true });
+    try {
+    
+    const response = await fetch(`http://localhost:3000/users/${user.uid}/allergies`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        allergies: allergyArray // e.g., ["Peanuts", "Soy"]
+      }),
+    });
 
-    console.log('Allergies saved');
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Something went wrong');
+    }
+
+    console.log('Success:', data.message);
+    return data;
+  } catch (error) {
+    console.log('Error:', error);
+  }
   }
 
   return (
