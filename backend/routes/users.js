@@ -37,20 +37,28 @@ res.json({ allergies });
 router.post('/:userId/allergies', async (req, res) => {
   try {
     const { userId } = req.params;
-    const { allergies } = req.body; // Expecting an array, e.g., ["Peanuts", "Dairy"]
+    const { allergies } = req.body; // Expecting { Death: ["Peanuts"], discomfort: ["Dairy"] }
 
     if (!userId) {
       return res.status(400).json({ error: 'User ID is required' });
     }
 
-    if (!Array.isArray(allergies)) {
-      return res.status(400).json({ error: 'Allergies must be provided as an array' });
+    if (!allergies || typeof allergies !== 'object' || Array.isArray(allergies)) {
+      return res.status(400).json({ error: 'Allergies must be provided as an object' });
+    }
+
+    if (allergies.Death && !Array.isArray(allergies.Death)) {
+      return res.status(400).json({ error: 'Death allergies must be an array' });
+    }
+
+    if (allergies.discomfort && !Array.isArray(allergies.discomfort)) {
+      return res.status(400).json({ error: 'Discomfort allergies must be an array' });
     }
 
     const userRef = db.collection('users').doc(userId);
 
-    // .set with merge: true will create the doc if it doesn't exist, 
-    // or just update the allergies field if it does.
+    // .set with merge: true merges nested fields. 
+    // Updating only 'Death' will leave an existing 'discomfort' array intact.
     await userRef.set({ 
       allergies: allergies 
     }, { merge: true });
