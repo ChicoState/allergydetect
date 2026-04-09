@@ -16,7 +16,8 @@ export default function CameraScreen() {
   const [scanningEnabled, setScanningEnabled] = useState(true);
 
   const [ingredients, setIngredients] = useState<string[]>([]);
-  const [contains, setContains] = useState<string[]>([]);
+  const [containsAllergens, setContainsAllergens] = useState<string[]>([]);
+  const [containsIntolerances, setContainsIntolerances] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -52,10 +53,12 @@ export default function CameraScreen() {
       }
 
       setIngredients(data.ingredients);
-      setContains(data.contains);
-
+      setContainsAllergens(data.containsAllergens);
+      setContainsIntolerances(data.containsIntolerances);
+      
       console.log("SAFE:", data.safe);
-      console.log("Matches:", data.contains);
+      console.log("Allergens:", data.containsAllergens);
+      console.log("Intolerances:", data.containsIntolerances);
 
     } catch (error) {
       console.log("Error fetching ingredients:", error);
@@ -106,15 +109,23 @@ export default function CameraScreen() {
 
         {/* ✅ RESULT DISPLAY */}
         {ingredients.length > 0 && !loading && (
-          contains.length === 0 ? (
-            <Text style={{ color: "green", fontWeight: "bold" }}>
-              ✅ SAFE
-            </Text>
-          ) : (
-            <Text style={{ color: "red", fontWeight: "bold" }}>
-              ⚠️ CONTAINS: {contains.join(", ")}
-            </Text>
-          )
+          <>
+            {containsAllergens.length === 0 ? (
+              <Text style={{ color: "green", fontWeight: "bold" }}>
+                ✅ SAFE (No allergens)
+              </Text>
+            ) : (
+              <Text style={{ color: "red", fontWeight: "bold" }}>
+                ⚠️ Contains allergens: {containsAllergens.join(", ")}
+              </Text>
+            )}
+        
+            {containsIntolerances.length > 0 && (
+              <Text style={{ color: "orange", fontWeight: "bold" }}>
+                ⚠️ Contains intolerances: {containsIntolerances.join(", ")}
+              </Text>
+            )}
+          </>
         )}
 
         {/* Optional: show ingredients */}
@@ -130,7 +141,8 @@ export default function CameraScreen() {
             setScannedValue(null);
             setScannedType(null);
             setIngredients([]);
-            setContains([]);
+            setContainsAllergens([]);
+            setContainsIntolerances([]);
             setScanningEnabled(true);
           }}
         >
