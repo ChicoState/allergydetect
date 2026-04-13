@@ -10,10 +10,11 @@ router.get('/', function(req, res, next) {
 /* GET user allergies/intolerances from Firestore */
 router.get('/:userId/allergies', async (req, res) => {
   try {
-    const userId = req.params.userId;
-    
-    if (!userId) {
-      return res.status(400).json({ error: 'User ID is required' });
+    const { userId } = req.params;
+    const userDoc = await db.collection('users').doc(userId).get();
+
+    if (!userDoc.exists) {
+      return res.status(404).json({ error: 'User not found' });
     }
 
     const userDoc = await db.collection('users').doc(userId).get();
@@ -43,8 +44,13 @@ router.post('/:userId/allergies', async (req, res) => {
     const { userId } = req.params;
     const { allergens, intolerances } = req.body; // Expecting two arrays
 
-    if (!userId) {
-      return res.status(400).json({ error: 'User ID is required' });
+    const existing = userDoc.exists ? (userDoc.data().allergies || {}) : {};
+
+    // Check if allergy already exists under any severity
+    for (const [sev, list] of Object.entries(existing)) {
+      if (list.includes(allergy)) {
+        return res.status(409).json({ error: `Allergy already exists under severity "${sev}"` });
+      }
     }
 
     if (!Array.isArray(allergens) || !Array.isArray(intolerances)) {
@@ -52,6 +58,11 @@ router.post('/:userId/allergies', async (req, res) => {
     }
 
     const userRef = db.collection('users').doc(userId);
+    const userDoc = await userRef.get();
+
+    if (!userDoc.exists) {
+      return res.status(404).json({ error: 'User not found' });
+    }
 
     // Save both arrays, merge if doc exists
     await userRef.set({ 
