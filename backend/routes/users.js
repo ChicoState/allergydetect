@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var db = require('../firebase');
+var getDb = require('../firebase');
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -10,6 +10,7 @@ router.get('/', function(req, res, next) {
 /* GET user allergies/intolerances from Firestore */
 router.get('/:userId/allergies', async (req, res) => {
   try {
+    const db = await getDb();
     const { userId } = req.params;
     const userDoc = await db.collection('users').doc(userId).get();
 
@@ -35,6 +36,7 @@ router.get('/:userId/allergies', async (req, res) => {
 /* POST set user allergies/intolerances in Firestore */
 router.post('/:userId/allergies', async (req, res) => {
   try {
+    const db = await getDb();
     const { userId } = req.params;
     const { allergens, intolerances } = req.body; // Expecting two arrays
 

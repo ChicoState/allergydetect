@@ -21,7 +21,7 @@ export default function Index() {
     try {
       const token = await user.getIdToken();
       const response = await fetch(
-        `http://localhost:3000/ingredients/894700010021/${user.uid}`,
+        `${process.env.EXPO_PUBLIC_API_URL}/ingredients/894700010021/${user.uid}`,
         { headers: { 'Authorization': `Bearer ${token}` } }
       );
 
@@ -59,7 +59,7 @@ export default function Index() {
 
     try {
       const token = await user.getIdToken();
-      const response = await fetch(`http://localhost:3000/users/${user.uid}/allergies`, {
+      const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/users/${user.uid}/allergies`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

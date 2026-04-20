@@ -1,4 +1,5 @@
 const admin = require('firebase-admin');
+const getDb = require('../firebase');
 
 async function requireAuth(req, res, next) {
   if (req.method === 'OPTIONS') {
@@ -14,9 +15,11 @@ async function requireAuth(req, res, next) {
   const token = authHeader.split('Bearer ')[1];
 
   try {
+    await getDb();
     req.user = await admin.auth().verifyIdToken(token);
     next();
-  } catch {
+  } catch (err) {
+    console.error(`[auth] ${req.method} ${req.path} - token verification failed:`, err.message);
     return res.status(401).json({ error: 'Invalid or expired token' });
   }
 }

@@ -1,9 +1,6 @@
 var express = require('express');
-const cors = require('cors');
 var router = express.Router();
-var db = require('../firebase');
-
-router.use(cors());
+var getDb = require('../firebase');
 
 
 /* GET home page. */
@@ -14,6 +11,7 @@ router.get('/', function(req, res, next) {
 
 router.get('/data', async (req, res) => {
   try {
+    const db = await getDb();
     const colRef = db.collection('test_data');
     const snapshot = await colRef.get();
 
@@ -42,6 +40,7 @@ router.get('/ingredients/:upc/:userId', async (req, res) => {
   }
 
   try {
+    const db = await getDb();
     const response = await fetch(
       `https://api.upcitemdb.com/prod/trial/lookup?upc=${upc}`
     );
