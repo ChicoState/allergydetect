@@ -19,8 +19,10 @@ export default function Index() {
     }
 
     try {
+      const token = await user.getIdToken();
       const response = await fetch(
-        `http://localhost:3000/ingredients/894700010021/${user.uid}`
+        `http://localhost:3000/ingredients/894700010021/${user.uid}`,
+        { headers: { 'Authorization': `Bearer ${token}` } }
       );
 
       const data = await response.json();
@@ -56,10 +58,12 @@ export default function Index() {
       .filter(item => item.length > 0);
 
     try {
+      const token = await user.getIdToken();
       const response = await fetch(`http://localhost:3000/users/${user.uid}/allergies`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           allergens: allergenArray,
