@@ -25,11 +25,15 @@ export default function Index() {
         { headers: { 'Authorization': `Bearer ${token}` } }
       );
 
-      const data = await response.json();
+      const text = await response.text();
+      console.log("Raw response status:", response.status);
+      console.log("Raw response body:", text);
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to fetch");
+        throw new Error(`HTTP ${response.status}: ${text}`);
       }
+
+      const data = JSON.parse(text);
 
       setIngredients(data.ingredients);
       setContainsAllergens(data.containsAllergens);

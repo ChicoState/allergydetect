@@ -78,3 +78,39 @@ aws lambda create-function --function-name url-test --runtime nodejs20.x --role 
 aws lambda create-function-url-config --function-name url-test --auth-type NONE --region us-east-2
 
 aws lambda add-permission --function-name url-test --statement-id pub --action lambda:InvokeFunctionUrl --principal "*" --function-url-auth-type NONE --region us-east-2
+
+# Nuke and recreate URL + permission
+aws lambda delete-function-url-config \
+  --function-name allergy-detect-backend \
+  --region us-east-2
+
+aws lambda remove-permission \
+  --function-name allergy-detect-backend \
+  --statement-id FunctionURLAllowPublicAccess \
+  --region us-east-2
+
+aws lambda create-function-url-config \
+  --function-name allergy-detect-backend \
+  --auth-type NONE \
+  --region us-east-2
+
+aws lambda add-permission \
+  --function-name allergy-detect-backend \
+  --statement-id FunctionURLAllowPublicAccess \
+  --action lambda:InvokeFunctionUrl \
+  --principal "*" \
+  --function-url-auth-type NONE \
+  --region us-east-2
+
+aws lambda add-permission \
+  --function-name allergy-detect-backend \
+  --statement-id AllowPublicInvokeFunction \
+  --action lambda:InvokeFunction \
+  --principal "*" \
+  --region us-east-2
+
+aws lambda get-function-url-config \
+  --function-name allergy-detect-backend \
+  --region us-east-2 \
+  --query 'FunctionUrl' \
+  --output text
