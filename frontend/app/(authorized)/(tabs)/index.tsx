@@ -19,15 +19,21 @@ export default function Index() {
     }
 
     try {
+      const token = await user.getIdToken();
       const response = await fetch(
-        `http://localhost:3000/ingredients/894700010021/${user.uid}`
+        `${process.env.EXPO_PUBLIC_API_URL}/ingredients/894700010021/${user.uid}`,
+        { headers: { 'Authorization': `Bearer ${token}` } }
       );
 
-      const data = await response.json();
+      const text = await response.text();
+      console.log("Raw response status:", response.status);
+      console.log("Raw response body:", text);
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to fetch");
+        throw new Error(`HTTP ${response.status}: ${text}`);
       }
+
+      const data = JSON.parse(text);
 
       setIngredients(data.ingredients);
       setContainsAllergens(data.containsAllergens);
@@ -56,10 +62,12 @@ export default function Index() {
       .filter(item => item.length > 0);
 
     try {
-      const response = await fetch(`http://localhost:3000/users/${user.uid}/allergies`, {
+      const token = await user.getIdToken();
+      const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/users/${user.uid}/allergies`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           allergens: allergenArray,

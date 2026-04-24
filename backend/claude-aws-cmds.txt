@@ -1,0 +1,116 @@
+aws lambda add-permission \
+  --function-name allergy-detect-backend \
+  --statement-id FunctionURLAllowPublicAccess \
+  --action lambda:InvokeFunctionUrl \
+  --principal "*" \
+  --function-url-auth-type NONE
+
+aws lambda create-function-url-config \
+  --function-name allergy-detect-backend \
+  --auth-type NONE
+
+aws lambda update-function-url-config \
+  --function-name allergy-detect-backend \
+  --auth-type NONE \
+  --cors '{
+    "AllowOrigins": ["*"],
+    "AllowMethods": ["*"],
+    "AllowHeaders": ["authorization", "content-type"],
+    "MaxAge": 86400
+  }'
+
+aws logs create-log-group --log-group-name /aws/lambda/allergy-detect-backend
+
+aws iam attach-role-policy \
+  --role-name <your-lambda-execution-role-name> \
+  --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+aws lambda invoke \
+  --function-name allergy-detect-backend \
+  --payload '{}' \
+  --cli-binary-format raw-in-base64-out \
+  /tmp/response.json
+
+cat /tmp/response.json
+
+aws lambda get-function-configuration \
+  --function-name allergy-detect-backend \
+  --query 'Environment'
+
+aws lambda update-function-configuration \
+  --function-name allergy-detect-backend \
+  --environment "Variables={FIREBASE_SECRET_NAME=firebase-service-account}"
+
+aws iam put-role-policy \
+  --role-name allergy-detect-backend-role-38ae7c9y \
+  --policy-name SecretsManagerRead \
+  --policy-document '{
+    "Version": "2012-10-17",
+    "Statement": [{
+      "Effect": "Allow",
+      "Action": "secretsmanager:GetSecretValue",
+      "Resource": "arn:aws:secretsmanager:us-east-2:681432800047:secret:firebase-service-account-*"
+    }]
+  }'
+
+curl -i -X POST \
+  -H "Authorization: Bearer fake" \
+  -H "Content-Type: application/json" \
+  -d '{}' \
+  https://vmm6gyo46nq65ovhihbjvpzwzy0fdhty.lambda-url.us-east-2.on.aws/users/test/allergies
+
+aws lambda get-function-url-config --function-name allergy-detect-backend
+
+curl -v -X POST \
+  -H "Authorization: Bearer fake" \
+  -H "Content-Type: application/json" \
+  -d '{}' \
+  https://vmm6gyo46nq65ovhihbjvpzwzy0fdhty.lambda-url.us-east-2.on.aws/users/test/allergies
+
+aws lambda get-function-url-config --function-name allergy-detect-backend --region us-east-2 --query 'FunctionUrl'
+
+aws logs tail /aws/lambda/allergy-detect-backend --since 5m --region us-east-2
+
+aws organizations list-policies-for-target --target-id <account-id> --filter SERVICE_CONTROL_POLICY
+
+aws lambda create-function --function-name url-test --runtime nodejs20.x --role arn:aws:iam::681432800047:role/allergy-detect-backend-role-38ae7c9y --handler index.handler --zip-file fileb://<(echo 'exports.handler=async()=>({statusCode:200,body:"ok"})' | zip - -) --region us-east-2
+
+aws lambda create-function-url-config --function-name url-test --auth-type NONE --region us-east-2
+
+aws lambda add-permission --function-name url-test --statement-id pub --action lambda:InvokeFunctionUrl --principal "*" --function-url-auth-type NONE --region us-east-2
+
+# Nuke and recreate URL + permission
+aws lambda delete-function-url-config \
+  --function-name allergy-detect-backend \
+  --region us-east-2
+
+aws lambda remove-permission \
+  --function-name allergy-detect-backend \
+  --statement-id FunctionURLAllowPublicAccess \
+  --region us-east-2
+
+aws lambda create-function-url-config \
+  --function-name allergy-detect-backend \
+  --auth-type NONE \
+  --region us-east-2
+
+aws lambda add-permission \
+  --function-name allergy-detect-backend \
+  --statement-id FunctionURLAllowPublicAccess \
+  --action lambda:InvokeFunctionUrl \
+  --principal "*" \
+  --function-url-auth-type NONE \
+  --region us-east-2
+
+aws lambda add-permission \
+  --function-name allergy-detect-backend \
+  --statement-id AllowPublicInvokeFunction \
+  --action lambda:InvokeFunction \
+  --principal "*" \
+  --region us-east-2
+
+aws lambda get-function-url-config \
+  --function-name allergy-detect-backend \
+  --region us-east-2 \
+  --query 'FunctionUrl' \
+  --output text

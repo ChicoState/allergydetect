@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var db = require('../firebase');
+var getDb = require('../firebase');
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -10,17 +10,12 @@ router.get('/', function(req, res, next) {
 /* GET user allergies/intolerances from Firestore */
 router.get('/:userId/allergies', async (req, res) => {
   try {
+    const db = await getDb();
     const { userId } = req.params;
     const userDoc = await db.collection('users').doc(userId).get();
 
     if (!userDoc.exists) {
       return res.status(404).json({ error: 'User not found' });
-    }
-
-    const userDoc = await db.collection('users').doc(userId).get();
-
-    if (!userDoc.exists) {
-      return res.status(404).json({ message: "User not found." });
     }
 
     const userData = userDoc.data();
@@ -41,17 +36,9 @@ router.get('/:userId/allergies', async (req, res) => {
 /* POST set user allergies/intolerances in Firestore */
 router.post('/:userId/allergies', async (req, res) => {
   try {
+    const db = await getDb();
     const { userId } = req.params;
     const { allergens, intolerances } = req.body; // Expecting two arrays
-
-    const existing = userDoc.exists ? (userDoc.data().allergies || {}) : {};
-
-    // Check if allergy already exists under any severity
-    for (const [sev, list] of Object.entries(existing)) {
-      if (list.includes(allergy)) {
-        return res.status(409).json({ error: `Allergy already exists under severity "${sev}"` });
-      }
-    }
 
     if (!Array.isArray(allergens) || !Array.isArray(intolerances)) {
       return res.status(400).json({ error: 'Allergens and intolerances must be arrays' });
