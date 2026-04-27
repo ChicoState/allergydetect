@@ -55,7 +55,7 @@ jobs:
         env:
           CI: true
 
-  test:
+  test-frontend:
     needs: changes
     if: needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
