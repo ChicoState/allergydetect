@@ -1,0 +1,21 @@
+#!/bin/sh
+
+if git diff --cached --name-only | grep -q '^frontend/'; then
+  echo "Frontend files staged — running unit tests..."
+  npm test --prefix frontend --silent
+  if [ $? -ne 0 ]; then
+    echo ""
+    echo "Frontend unit tests failed. Fix the failures above before committing."
+    exit 1
+  fi
+fi
+
+if git diff --cached --name-only | grep -q '^backend/'; then
+  echo "Backend files staged — running unit tests..."
+  npm test --prefix backend --silent
+  if [ $? -ne 0 ]; then
+    echo ""
+    echo "Backend unit tests failed. Fix the failures above before committing."
+    exit 1
+  fi
+fi
