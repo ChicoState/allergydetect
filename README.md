@@ -1,5 +1,13 @@
 # Allergy Detect
 
+## Pre-Commit Hooks
+* run:
+```bash
+git config core.hooksPath .githooks
+```
+* This will make it so that unit test run on your local commit. They also run in CI but these are much slower so it's good to know if it's going to pass before you push.
+* You can skip this with the `--no-verify` argument.
+
 ## Frontend setup
 * Install Android SDK and emulator as per [these](https://reactnative.dev/docs/set-up-your-environment) instructions
 * If using MacOS install Homebrew if not already installed as per [these](https://brew.sh/) instructions 
