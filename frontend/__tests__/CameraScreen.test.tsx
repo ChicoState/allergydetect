@@ -28,7 +28,10 @@ jest.mock('expo-router', () => ({
   useRouter: jest.fn(() => ({ back: mockBack })),
 }));
 
-const mockUser = { uid: 'test-uid-123' };
+const mockUser = {
+  uid: 'test-uid-123',
+  getIdToken: jest.fn(),
+};
 
 const mockFetch = jest.fn();
 global.fetch = mockFetch;
@@ -37,6 +40,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   capturedOnBarcodeScanned = undefined;
   (useAuthSession as jest.Mock).mockReturnValue({ user: mockUser });
+  mockUser.getIdToken.mockResolvedValue('mock-firebase-token');
   mockFetch.mockResolvedValue({
     ok: true,
     json: jest.fn().mockResolvedValue({
@@ -63,7 +67,7 @@ describe('Camera screen', () => {
     const { getByText } = render(<CameraScreen />);
 
     expect(getByText('Camera permission required.')).toBeTruthy();
-    expect(getByText('Grant permission')).toBeTruthy();
+    expect(getByText('Grant Permission')).toBeTruthy();
   });
 
   it('calls requestPermission when Grant permission is pressed', () => {
@@ -74,7 +78,7 @@ describe('Camera screen', () => {
     ]);
 
     const { getByText } = render(<CameraScreen />);
-    fireEvent.press(getByText('Grant permission'));
+    fireEvent.press(getByText('Grant Permission'));
 
     expect(mockRequestPermission).toHaveBeenCalled();
   });
@@ -96,7 +100,10 @@ describe('Camera screen', () => {
     });
 
     expect(mockFetch).toHaveBeenCalledWith(
-      'http://localhost:3000/ingredients/012345678905/test-uid-123'
+      'http://localhost:3000/ingredients/012345678905/test-uid-123',
+      expect.objectContaining({
+        headers: { Authorization: 'Bearer mock-firebase-token' },
+      })
     );
   });
 

@@ -156,3 +156,4 @@ stephen-ghcr-pat
 # End of https://www.toptal.com/developers/gitignore/api/node,firebase
 backend/serviceAccountKey.json
 frontend/node_modules/*
+backend/node_modules/*
