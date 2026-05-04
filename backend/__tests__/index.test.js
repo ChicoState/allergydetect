@@ -98,6 +98,7 @@ describe('GET /ingredients/:upc/:userId', () => {
     const userData = { allergens: ['peanut'], intolerances: ['gluten'] };
     const mockRef = {
       get: jest.fn().mockResolvedValue({ exists: true, data: () => userData }),
+      collection: jest.fn().mockReturnValue({ add: jest.fn().mockResolvedValue({}) }),
     };
     const mockCollection = { doc: jest.fn().mockReturnValue(mockRef) };
     getDb.mockResolvedValue({ collection: jest.fn().mockReturnValue(mockCollection) });
@@ -120,6 +121,7 @@ describe('GET /ingredients/:upc/:userId', () => {
     const userData = { allergens: ['peanut'], intolerances: ['gluten'] };
     const mockRef = {
       get: jest.fn().mockResolvedValue({ exists: true, data: () => userData }),
+      collection: jest.fn().mockReturnValue({ add: jest.fn().mockResolvedValue({}) }),
     };
     const mockCollection = { doc: jest.fn().mockReturnValue(mockRef) };
     getDb.mockResolvedValue({ collection: jest.fn().mockReturnValue(mockCollection) });
@@ -143,6 +145,7 @@ describe('GET /ingredients/:upc/:userId', () => {
     const userData = { allergens: ['peanut'], intolerances: ['wheat'] };
     const mockRef = {
       get: jest.fn().mockResolvedValue({ exists: true, data: () => userData }),
+      collection: jest.fn().mockReturnValue({ add: jest.fn().mockResolvedValue({}) }),
     };
     const mockCollection = { doc: jest.fn().mockReturnValue(mockRef) };
     getDb.mockResolvedValue({ collection: jest.fn().mockReturnValue(mockCollection) });
