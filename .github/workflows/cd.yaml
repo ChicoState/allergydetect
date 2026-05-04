@@ -28,6 +28,6 @@ jobs:
           docker push ${{ vars.BACKEND_ECR_URI }}:latest
 
       - name: Update Lambda
-        run: aws lambda update-function-code --function-name allergy-detect-backend --image-uri ${{ AWS_LAMBDA_BACKEND_IMAGE_URI }}
+        run: aws lambda update-function-code --function-name allergy-detect-backend --image-uri ${{ secrets.AWS_LAMBDA_BACKEND_IMAGE_URI }}
         # Shouldn't have all this hard coded but it's fine for now
 

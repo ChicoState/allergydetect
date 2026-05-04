@@ -6,17 +6,6 @@ on:
       - main
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Build Docker image
-        run: docker build ./backend
-
-      #- name: Start backend
-      #  run: nohup npm start --prefix backend > /dev/null 2>&1 &
-
   changes:
     runs-on: ubuntu-latest
     outputs:
@@ -32,6 +21,19 @@ jobs:
               - 'frontend/**'
             backend:
               - 'backend/**'
+
+  build:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build ./backend
+
+      #- name: Start backend
+      #  run: nohup npm start --prefix backend > /dev/null 2>&1 &
 
   test-backend:
     needs: changes
