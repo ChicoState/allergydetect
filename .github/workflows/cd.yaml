@@ -1,0 +1,33 @@
+name: CD
+
+permissions:
+  id-token: write
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v6.1.0
+        with:
+          role-to-assume: ${{ secrets.OIDC_BACKEND_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Login to ECR
+        run: aws ecr get-login-password | docker login --username AWS --password-stdin <account-id>.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com
+
+      - name: Build and push image
+        run: |
+          docker build -t ${{ vars.BACKEND_ECR_URI }}:latest ./backend
+          docker push ${{ vars.BACKEND_ECR_URI }}:latest
+
+      - name: Update Lambda
+        run: aws lambda update-function-code --function-name allergy-detect-backend --image-uri ${{ AWS_LAMBDA_BACKEND_IMAGE_URI }}
+        # Shouldn't have all this hard coded but it's fine for now
+
